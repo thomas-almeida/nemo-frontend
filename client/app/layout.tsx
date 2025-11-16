@@ -1,17 +1,20 @@
+'use client';
+
 import type { Metadata } from "next";
 import "./globals.css";
 import SideBar from "./components/SideBar";
-
-export const metadata: Metadata = {
-  title: "Nemo",
-  description: "Venda melhor, mais rápido",
-};
+import { Provider } from "./components/Provider";
+import MessageBanner from "./components/MessageBanner";
+import { usePathname } from "next/navigation";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isRoot = pathname === '/';
+
   return (
     <html lang="pt-br">
       <head>
@@ -22,9 +25,22 @@ export default function RootLayout({
           referrerPolicy="no-referrer"
         />
       </head>
-      <body className="antialiased flex h-screen justify-start">
-        <SideBar />
-        {children}
+      <body className="antialiased flex justify-start">
+        <Provider>
+          <SideBar />
+          <div className={`${!isRoot ? 'pl-45' : ''} flex flex-col justify-start items-start w-full h-screen`}>
+            {
+              !isRoot && (
+                <MessageBanner />
+              )
+            }
+            <div className="w-full h-full overflow-y-auto flex justify-center items-start">
+              <div className="w-[90%]">
+                {children}
+              </div>
+            </div>
+          </div>
+        </Provider>
       </body>
     </html>
   );

@@ -9,17 +9,17 @@ export default function SettingsPage() {
     const [qrCode, setQrCode] = useState("");
     const [statusData, setStatusData] = useState<any>({});
 
-    useEffect(() => {
-        axios.get("http://localhost:3000/qrcode").then((response) => {
-            setQrCode(response.data.qrCode);
-        });
-    }, []);
+    // useEffect(() => {
+    //     axios.get("http://localhost:3000/qrcode").then((response) => {
+    //         setQrCode(response.data.qrCode);
+    //     });
+    // }, []);
 
-    useEffect(() => {
-        axios.get("http://localhost:3000/status").then((response) => {
-            setStatusData(response.data);
-        });
-    }, []);
+    // useEffect(() => {
+    //     axios.get("http://localhost:3000/status").then((response) => {
+    //         setStatusData(response.data);
+    //     });
+    // }, []);
 
     return (
         <div className="flex justify-center items-start h-screen w-full py-4">
