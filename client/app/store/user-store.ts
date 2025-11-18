@@ -6,11 +6,15 @@ type UserState = {
     username: string;
     email: string;
     sessionId: string;
+    isLoading: boolean;
+    error: string | null;
 }
 
 type UserStore = UserState & {
-    setUser: (user: UserState) => void;
+    setUser: (user: Partial<UserState>) => void;
     clearUser: () => void;
+    setLoading: (isLoading: boolean) => void;
+    setError: (error: string | null) => void;
 }
 
 const initialState: UserState = {
@@ -18,17 +22,27 @@ const initialState: UserState = {
     username: "",
     email: "",
     sessionId: "",
+    isLoading: false,
+    error: null,
 }
 
 const useUserStore = create<UserStore>()(
     persist(
         (set) => ({
             ...initialState,
-            setUser: (user: UserState) => set(user),
+            setUser: (user: Partial<UserState>) => set((state) => ({ ...state, ...user })),
             clearUser: () => set(initialState),
+            setLoading: (isLoading: boolean) => set({ isLoading }),
+            setError: (error: string | null) => set({ error }),
         }),
         {
-            name: 'user-storage', // name of the item in the storage (must be unique)
+            name: 'user-storage',
+            partialize: (state) => ({
+                id: state.id,
+                username: state.username,
+                email: state.email,
+                sessionId: state.sessionId,
+            })
         }
     )
 )

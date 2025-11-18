@@ -5,22 +5,23 @@ import { redirect } from "next/navigation";
 import { useEffect } from "react";
 import Item from "../components/Item";
 import Link from "next/link";
+import { useAuth } from "../hooks/use-auth";
 
 export default function Dashboard() {
     const session = useSession();
-
+    const { user } = useAuth()
+    
     useEffect(() => {
         if (session.status === 'unauthenticated') {
             redirect('/');
         }
     }, [session.status])
 
-
     return (
         <div className="flex justify-center items-start h-screen w-full">
             <div className="flex flex-col gap-1 w-full p-4 py-6">
                 <div className="py-4">
-                    <h1>Olá, <b>{session.data?.user?.name}</b></h1>
+                    <h1>Olá, <b>{user.username}</b></h1>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <Link href="/dashboard/campaigns">

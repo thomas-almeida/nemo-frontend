@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Send, House, Settings, Folder, LogOut, BadgePercent } from "lucide-react";
+import { Send, House, Settings, Folder, LogOut, BadgePercent, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from "next-auth/react";
@@ -42,6 +42,10 @@ export default function SideBar() {
                 <Link href="/dashboard/projects" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
                     <Folder className="h-4 w-4" />
                     <li className="py-1">Projetos</li>
+                </Link>
+                <Link href="/dashboard/settings" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
+                    <User className="h-4 w-4" />
+                    <li className="py-1">Clientes</li>
                 </Link>
                 <Link href="/dashboard/settings" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
                     <BadgePercent className="h-4 w-4" />

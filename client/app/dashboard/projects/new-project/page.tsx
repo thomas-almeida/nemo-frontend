@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import DatePicker from '@/app/components/DatePicker';
 import Select from '@/app/components/Select';
 import { Label } from '@/components/ui/label';
+import CheckBoxItem from '@/app/components/CheckBoxItem';
 
 interface Unit {
     id: string;
@@ -65,6 +66,18 @@ export default function NewProject() {
                                         placeholder="..."
                                         className=""
                                     />
+                                </div>
+
+                                <div className='flex flex-col gap-4 pt-4'>
+                                    <div className="flex flex-col gap-2 border p-2 rounded py-4">
+                                        <h3 className="font-medium text-sm">Tipo das Unidades</h3>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <CheckBoxItem label="HIS" description="Unidades Residenciais com trava de renda" />
+                                            <CheckBoxItem label="HMP" description="Unidades Residenciais com curta temporada" />
+                                            <CheckBoxItem label="R2V" description="Unidades com livre legislação" />
+                                            <CheckBoxItem label="NR" description="Unidades para curta temporada apenas" />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className='flex flex-col gap-4 pt-4'>
