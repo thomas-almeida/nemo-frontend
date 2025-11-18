@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { Folder, Plus, Trash2, Upload, X } from "lucide-react";
+import { Folder, Plus, Trash2} from "lucide-react";
 import FileUpload from "@/app/components/FileUpload";
 import { Input } from "@/components/ui/input";
 import Accordion from "@/app/components/Accordion";
