@@ -15,9 +15,10 @@ import {
 interface DatePickerProps {
   label: string;
   selectText: string;
+  onSelectDate?: (date: Date | undefined) => void;
 }
 
-export default function DatePicker({ label, selectText }: DatePickerProps) {
+export default function DatePicker({ label, selectText, onSelectDate }: DatePickerProps) {
   const [open, setOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(undefined)
 
@@ -43,8 +44,9 @@ export default function DatePicker({ label, selectText }: DatePickerProps) {
             selected={date}
             captionLayout="dropdown"
             onSelect={(date) => {
-              setDate(date)
-              setOpen(false)
+              setDate(date);
+              setOpen(false);
+              onSelectDate?.(date);
             }}
           />
         </PopoverContent>

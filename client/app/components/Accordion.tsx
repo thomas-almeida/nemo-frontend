@@ -9,6 +9,7 @@ export default function Accordion({ title, children, defaultOpen = true }: { tit
   return (
     <div className="border border-slate-200 rounded mb-4 overflow-hidden shadow">
       <button
+        type="button"
         className="w-full flex justify-between items-center p-4 text-left hover:bg-slate-50 transition-colors cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
