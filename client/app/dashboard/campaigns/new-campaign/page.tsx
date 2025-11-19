@@ -3,17 +3,20 @@
 import { Send, Goal, Plus, CalendarCheck2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useCallback, useEffect } from "react";
+import { formatPhoneNumber } from "@/lib/phone-utils";
 import Spinner from "@/app/components/Spinner";
 import Select from "@/app/components/Select";
 import MessageComponent from "@/app/components/MessageComponent";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { sendMessage } from "@/app/service/sender-service";
 import Image from "next/image";
 import Accordion from "@/app/components/Accordion";
 import { useProjects } from "@/app/hooks/use-projects";
 import { useMessages } from "@/app/hooks/use-messages";
 import { useCustomers } from "@/app/hooks/use-customers";
+import { SendingProgressModal } from "../../../components/SendingProgressModal";
+import { sendMessage } from "@/app/service/sender-service";
+import { useAuth } from "@/app/hooks/use-auth";
 
 export default function NewCampaign() {
 
@@ -21,12 +24,14 @@ export default function NewCampaign() {
     const { messages: allMessages } = useMessages();
     const { customers } = useCustomers();
 
+    const { user } = useAuth();
+
     const [numbers, setNumbers] = useState('');
     const [targetList, setTargetList] = useState<string>('select');
     const [selectedCustomers, setSelectedCustomers] = useState<any>([]);
     const [image, setImage] = useState('')
     const [copy, setCopy] = useState('')
-    const [messages, setMessages] = useState<Array<{ id: number; text: string; image?: string }>>([]);
+    const [messages, setMessages] = useState<Array<{ id: number; message: string; image?: string }>>([]);
     const [availableCopies, setAvailableCopies] = useState<Array<{ value: string; label: string }>>([]);
 
     const [allCustomers, setAllCustomers] = useState(customers);
@@ -44,10 +49,14 @@ export default function NewCampaign() {
         setMessages(prev => prev.filter(msg => msg.id !== id));
     }, []);
 
+    const [isSending, setIsSending] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [intervalMinutes, setIntervalMinutes] = useState(5); // Default to 1 minute
-    const [messagesPerSend, setMessagesPerSend] = useState(5);
+    const [currentBatch, setCurrentBatch] = useState(1);
+    const [currentNumber, setCurrentNumber] = useState('');
+    const [sentNumbers, setSentNumbers] = useState<string[]>([]);
+    const [showProgressModal, setShowProgressModal] = useState(false);
+    const [intervalMinutes, setIntervalMinutes] = useState(5);
+    const [sendsPerRound, setSendsPerRound] = useState(5);
     const [project, setProject] = useState('');
 
     // Carrega as cópias disponíveis quando um projeto é selecionado
@@ -80,44 +89,82 @@ export default function NewCampaign() {
         }
     }, [project, allMessages]);
 
-    async function send(numbers: string) {
-        const numbersArr = numbers.split(',').map(num => num.trim()).filter(Boolean);
-        let currentIndex = 0;
-        setIsProcessing(true);
+    async function send() {
+        if (selectedCustomers.length === 0) {
+            alert('Selecione pelo menos um contato para enviar a campanha.');
+            return;
+        }
+
+        if (messages.length === 0) {
+            alert('Adicione pelo menos uma mensagem à campanha.');
+            return;
+        }
+
+        setIsSending(true);
         setProgress(0);
+        setCurrentBatch(1);
+        setShowProgressModal(true);
 
-        const sendNextBatch = async () => {
-            const batch = numbersArr.slice(currentIndex, currentIndex + messagesPerSend);
+        const numbers = selectedCustomers;
+        const mps = sendsPerRound;
+        const intervalMs = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
+        const msgs = messages;
+        const totalBatches = Math.ceil(numbers.length / mps);
+        let processedCount = 0;
+        let currentIndex = 0;
 
-            // Envia as mensagens em sequência para cada número do lote atual
-            for (const number of batch) {
-                console.log('Enviando para:', number);
+        const sendBatch = async (startIdx: number, batchNumber: number) => {
+            const endIdx = Math.min(startIdx + mps, numbers.length);
+            setCurrentBatch(batchNumber);
 
-                // Envia todas as mensagens para o número atual
-                for (const msg of messages) {
-                    await sendMessage(number, msg.text);
-                }
+            for (let i = startIdx; i < endIdx; i++) {
+                setCurrentNumber(numbers[i]?.phone || '');
+                processedCount++;
 
-                currentIndex++;
-                const newProgress = Math.round((currentIndex / numbersArr.length) * 100);
+                // Calculate progress
+                const newProgress = Math.round((processedCount / numbers.length) * 100);
                 setProgress(newProgress);
 
-                // Aguarda o intervalo entre mensagens, exceto após a última mensagem
-                if (currentIndex < numbersArr.length) {
-                    await new Promise(resolve => setTimeout(resolve, intervalMinutes * 60 * 1000));
+                const newMsgFormatt = msgs.map(msg => ({
+                    message: msg.message,
+                    image: msg.image
+                }));
+
+                try {
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    const formattedPhone = formatPhoneNumber(numbers[i].phone);
+                    const response = await sendMessage(user.sessionId, formattedPhone, newMsgFormatt);
+
+                    if (response) {
+                        console.log(`[${i + 1}/${numbers.length}] Enviado para: ${formattedPhone}`);
+                        setSentNumbers(prev => [...prev, formattedPhone]);
+                    }
+
+                } catch (error) {
+                    console.error(`Erro ao enviar para ${numbers[i].phone}:`, error);
+                }
+
+                // If not the last number in the batch, wait for the interval
+                if (i < endIdx - 1) {
+                    await new Promise(resolve => setTimeout(resolve, intervalMs));
                 }
             }
 
-            // Se ainda houver mais números para enviar, agenda o próximo lote
-            if (currentIndex < numbersArr.length) {
-                setTimeout(sendNextBatch, 0);
+            currentIndex = endIdx;
+
+            // If there are more numbers to process, schedule the next batch
+            if (currentIndex < numbers.length) {
+                const nextBatchNumber = batchNumber + 1;
+                setTimeout(() => sendBatch(currentIndex, nextBatchNumber), intervalMs);
             } else {
-                setIsProcessing(false);
+                console.log('\n--- Todos os envios foram concluídos! ---');
+                setIsSending(false);
             }
         };
 
-        // Inicia o processo de envio
-        sendNextBatch();
+        // Start the first batch
+        await sendBatch(0, 1);
     }
 
     return (
@@ -155,16 +202,16 @@ export default function NewCampaign() {
                             <p className="text-sm text-slate-500 mb-3">De quanto em quanto tempo as mensagens serão enviadas?</p>
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="border border-slate-200 py-2 px-4 rounded-sm">
-                                    <h4 className="font-medium">Mensagens por vez:</h4>
+                                    <h4 className="font-medium">Envios por vez:</h4>
                                     <Select
                                         options={[
-                                            { value: 1, label: '1 por vez' },
-                                            { value: 5, label: '5 por vez' },
-                                            { value: 10, label: '10 por vez' },
-                                            { value: 15, label: '15 por vez' },
+                                            { value: 1, label: '1 envio por vez' },
+                                            { value: 5, label: '5 envios por vez' },
+                                            { value: 10, label: '10 envios por vez' },
+                                            { value: 15, label: '15 envios por vez' },
                                         ]}
-                                        value={messagesPerSend}
-                                        onChange={(value) => setMessagesPerSend(Number(value))}
+                                        value={sendsPerRound}
+                                        onChange={(value) => setSendsPerRound(Number(value))}
                                     />
                                 </div>
                                 <div className="border border-slate-200 py-2 px-4 rounded-sm">
@@ -229,7 +276,7 @@ export default function NewCampaign() {
                                                 <Select
                                                     options={[
                                                         { value: '', label: 'Nenhuma' },
-                                                        { value: '/building.jpeg', label: '/building.jpeg' },
+                                                        { value: 'https://pinbarrafunda.site/assets/images/pin-book-a3-69-1.webp', label: 'Imagem Teste' },
                                                     ]}
                                                     value={image}
                                                     onChange={(value) => setImage(value)}
@@ -265,7 +312,7 @@ export default function NewCampaign() {
                                                     if (!copy && !image) return;
                                                     const newMessage = {
                                                         id: Date.now(),
-                                                        text: copy || '',
+                                                        message: copy || '',
                                                         ...(image && { image })
                                                     };
                                                     setMessages(prev => [...prev, newMessage]);
@@ -289,7 +336,7 @@ export default function NewCampaign() {
                                                     key={message.id}
                                                     id={message.id}
                                                     index={index}
-                                                    message={message.text}
+                                                    message={message.message}
                                                     image={message.image}
                                                     moveMessage={moveMessage}
                                                     draggable={true}
@@ -312,60 +359,33 @@ export default function NewCampaign() {
                     </div>
                 </div>
 
-                {
-                    isProcessing && (
-                        <div className="w-full flex items-center justify-between gap-1 bg-gray-200 rounded-full h-1 mb-4">
-                            <div
-                                className="bg-green-600 h-1 rounded-full transition-all duration-500 ease-out"
-                                style={{ width: `${progress}%` }}
-                            ></div>
-                            <span>{progress}%</span>
-                        </div>
-                    )
-                }
+                <SendingProgressModal
+                    isOpen={showProgressModal}
+                    onClose={() => {
+                        if (progress >= 100 || !isSending) {
+                            setShowProgressModal(false);
+                            // Reset sent numbers when closing the modal
+                            if (progress >= 100) {
+                                setSentNumbers([]);
+                            }
+                        }
+                    }}
+                    progress={progress}
+                    currentBatch={currentBatch}
+                    totalBatches={Math.ceil(selectedCustomers.length / sendsPerRound)}
+                    currentNumber={currentNumber}
+                    totalNumbers={selectedCustomers.length}
+                    processedCount={Math.round((progress / 100) * selectedCustomers.length)}
+                    sentNumbers={sentNumbers}
+                />
 
-                <div className="grid grid-cols-2 gap-2 px-2 pb-4">
+                <div className="grid grid-cols-1 gap-2 px-2 pb-4">
                     <Button
-                        disabled={numbers.length === 0 || isProcessing}
-                        className={`cursor-pointer ${isProcessing ? 'bg-gray-700' : 'bg-green-600'} w-full`}
-                        onClick={() => {
-                            const intervalMs = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
-                            console.log(`Interval set to ${intervalMs}ms`);
-                            send(numbers);
-                        }}
+                        className={`cursor-pointer ${isSending ? 'bg-gray-700' : 'bg-green-600 hover:bg-green-700'} w-full`}
+                        onClick={send}
+                        disabled={isSending}
                     >
-                        {
-                            isProcessing
-                                ? 'Enviando...'
-                                : 'Disparar Agora'
-                        }
-                        {
-                            isProcessing
-                                ? <Spinner />
-                                : <Send className="h-4 w-4" />
-                        }
-
-                    </Button>
-                    <Button
-                        disabled={numbers.length === 0 || isProcessing}
-                        className={`cursor-pointer ${isProcessing ? 'bg-gray-700' : 'bg-slate-600'} w-full`}
-                        onClick={() => {
-                            const intervalMs = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
-                            console.log(`Interval set to ${intervalMs}ms`);
-                            send(numbers);
-                        }}
-                    >
-                        {
-                            isProcessing
-                                ? 'Enviando...'
-                                : 'Agendar Disparo'
-                        }
-                        {
-                            isProcessing
-                                ? <Spinner />
-                                : <CalendarCheck2 className="h-4 w-4" />
-                        }
-
+                        {isSending ? 'Enviando...' : 'Disparar Agora'}
                     </Button>
                 </div>
 
