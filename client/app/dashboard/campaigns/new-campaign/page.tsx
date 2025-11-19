@@ -2,7 +2,7 @@
 
 import { Send, Goal, Plus, CalendarCheck2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Spinner from "@/app/components/Spinner";
 import Select from "@/app/components/Select";
 import MessageComponent from "@/app/components/MessageComponent";
@@ -11,14 +11,25 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { sendMessage } from "@/app/service/sender-service";
 import Image from "next/image";
 import Accordion from "@/app/components/Accordion";
+import { useProjects } from "@/app/hooks/use-projects";
+import { useMessages } from "@/app/hooks/use-messages";
+import { useCustomers } from "@/app/hooks/use-customers";
 
 export default function NewCampaign() {
 
+    const { projects } = useProjects();
+    const { messages: allMessages } = useMessages();
+    const { customers } = useCustomers();
+
     const [numbers, setNumbers] = useState('');
-    const [targetList, setTargetList] = useState('all');
+    const [targetList, setTargetList] = useState<string>('select');
+    const [selectedCustomers, setSelectedCustomers] = useState<any>([]);
     const [image, setImage] = useState('')
     const [copy, setCopy] = useState('')
     const [messages, setMessages] = useState<Array<{ id: number; text: string; image?: string }>>([]);
+    const [availableCopies, setAvailableCopies] = useState<Array<{ value: string; label: string }>>([]);
+
+    const [allCustomers, setAllCustomers] = useState(customers);
 
     const moveMessage = useCallback((dragIndex: number, hoverIndex: number) => {
         setMessages((prevMessages) => {
@@ -38,6 +49,36 @@ export default function NewCampaign() {
     const [intervalMinutes, setIntervalMinutes] = useState(5); // Default to 1 minute
     const [messagesPerSend, setMessagesPerSend] = useState(5);
     const [project, setProject] = useState('');
+
+    // Carrega as cópias disponíveis quando um projeto é selecionado
+    useEffect(() => {
+        if (allMessages.length > 0) {
+            let projectMessages;
+
+            if (project === 'all') {
+                // Se "nenhum específico" for selecionado, carrega todas as mensagens
+                projectMessages = allMessages;
+            } else if (project) {
+                // Filtra as mensagens pelo projectId selecionado
+                projectMessages = allMessages.filter(msg => msg.projectId === project);
+            } else {
+                // Se nenhum projeto for selecionado, não mostra cópias
+                setAvailableCopies([{ value: '', label: 'Nenhuma' }]);
+                return;
+            }
+
+            const copies = projectMessages.map(msg => ({
+                value: msg.copy || msg.name,
+                label: msg.name
+            }));
+            setAvailableCopies([
+                { value: '', label: 'Nenhuma' },
+                ...copies
+            ]);
+        } else {
+            setAvailableCopies([{ value: '', label: 'Nenhuma' }]);
+        }
+    }, [project, allMessages]);
 
     async function send(numbers: string) {
         const numbersArr = numbers.split(',').map(num => num.trim()).filter(Boolean);
@@ -98,9 +139,12 @@ export default function NewCampaign() {
                             <p className="text-sm text-slate-500 mb-3">Escolha qual projeto/produto quer disparar</p>
                             <Select
                                 options={[
-                                    { value: '1', label: 'Projeto 1' },
-                                    { value: '2', label: 'Projeto 2' },
-                                    { value: '3', label: 'Projeto 3' },
+                                    { value: '', label: 'Selecione um projeto...' },
+                                    { value: 'all', label: 'Nenhum (Carrega todas as mensagens)' },
+                                    ...projects.map(proj => ({
+                                        value: proj._id,
+                                        label: proj.info?.name || `Projeto ${proj._id.substring(0, 6)}...`
+                                    }))
                                 ]}
                                 value={project}
                                 onChange={setProject}
@@ -143,12 +187,18 @@ export default function NewCampaign() {
                             <p className="text-sm text-slate-500 mb-3">Selecione a lista alvo</p>
                             <Select
                                 options={[
-                                    { value: 'all', label: 'Toda minha base' },
-                                    { value: 'list', label: 'Lista do projeto' },
-                                    { value: 'custom', label: 'Lista personalizada 1' },
+                                    { value: 'select', label: 'Selecione' },
+                                    { value: 'all', label: 'Toda Minha Base' },
                                 ]}
                                 value={targetList}
-                                onChange={(value) => setTargetList(value)}
+                                onChange={(value) => {
+                                    setTargetList(value);
+                                    if (value === 'all') {
+                                        setSelectedCustomers(allCustomers);
+                                    } else {
+                                        setSelectedCustomers([]);
+                                    }
+                                }}
                             />
                         </Accordion>
 
@@ -201,10 +251,7 @@ export default function NewCampaign() {
                                                 )
                                             }
                                             <Select
-                                                options={[
-                                                    { value: ``, label: 'Nenhuma' },
-                                                    { value: `Esta é uma **preview** de como as mensagens ficam`, label: 'Mensagem 1' },
-                                                ]}
+                                                options={availableCopies}
                                                 value={copy}
                                                 onChange={(value) => setCopy(value)}
                                             />
