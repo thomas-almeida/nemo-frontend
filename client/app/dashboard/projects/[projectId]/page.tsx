@@ -239,7 +239,7 @@ export default function ProjectPage() {
     }
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="container mx-auto p-6 space-y-6 w-[80%]">
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold">{project.info.name}</h1>
