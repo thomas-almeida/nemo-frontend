@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "pinbarrafunda.site"
+      },
+      {
+        protocol: "https",
+        hostname: "drive.google.com"
       }
     ],
   },

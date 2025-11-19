@@ -4,11 +4,17 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import { useDrag, useDrop } from 'react-dnd';
+import { FileText, Image as ImageIcon } from 'lucide-react';
 
 interface MessageComponentProps {
     id?: string | number;
     message: string;
-    image?: string;
+    image?: {
+        url: string,
+        type: string,
+        name: string,
+        publicLink: string
+    }
     index?: number;
     moveMessage?: (dragIndex: number, hoverIndex: number) => void;
     draggable?: boolean;
@@ -23,7 +29,7 @@ interface DragItem {
 
 const DraggableMessage: React.FC<MessageComponentProps & { index: number }> = ({ id, message, image, index, moveMessage, onDelete }) => {
     const ref = React.useRef<HTMLDivElement>(null);
-
+    
     const [{ isDragging }, drag] = useDrag({
         type: 'message',
         item: () => ({ id, index }),
@@ -36,7 +42,7 @@ const DraggableMessage: React.FC<MessageComponentProps & { index: number }> = ({
         accept: 'message',
         hover(item: DragItem, monitor) {
             if (!ref.current || !moveMessage) return;
-            
+
             const dragIndex = item.index;
             const hoverIndex = index;
 
@@ -50,8 +56,8 @@ const DraggableMessage: React.FC<MessageComponentProps & { index: number }> = ({
     drag(drop(ref));
 
     return (
-        <div 
-            ref={ref} 
+        <div
+            ref={ref}
             style={{ opacity: isDragging ? 0.5 : 1 }}
             className="relative cursor-move"
         >
@@ -60,22 +66,45 @@ const DraggableMessage: React.FC<MessageComponentProps & { index: number }> = ({
     );
 };
 
-const MessageContent: React.FC<Pick<MessageComponentProps, 'message' | 'image' | 'onDelete' | 'id'>> = ({ message, image, onDelete, id }) => (
+const MessageContent: React.FC<Pick<MessageComponentProps, 'message' | 'image' | 'onDelete' | 'id'>> = ({ message, image, onDelete, id }) => {
+    const isImage = image?.type?.startsWith('image/');
+    
+    return (
     <div className="border p-2 rounded-md bg-gray-50 my-2 relative group">
         {image && (
-            <Image
-                src={image}
-                alt="Imagem"
-                width={200}
-                height={200}
-                className="w-full h-auto rounded mb-2"
-            />
+            <div className="mb-2">
+                {isImage ? (
+                    <Image
+                        src={image.publicLink}
+                        alt={image.name || 'Imagem'}
+                        width={200}
+                        height={200}
+                        className="w-full h-auto rounded"
+                    />
+                ) : (
+                    <div className="flex flex-col items-center p-4 border rounded bg-white">
+                        <FileText className="w-12 h-12 text-gray-400 mb-2" />
+                        <span className="text-sm text-gray-600 text-center break-all">{image.name || 'Documento'}</span>
+                        <a 
+                            href={image.publicLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="mt-2 text-sm text-blue-500 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            Ver documento
+                        </a>
+                    </div>
+                )}
+            </div>
         )}
+        {message && (
         <div className="prose max-w-none">
             <ReactMarkdown>{message}</ReactMarkdown>
         </div>
+    )}
         {onDelete && id && (
-            <button 
+            <button
                 onClick={(e) => {
                     e.stopPropagation();
                     onDelete(id);
@@ -90,12 +119,13 @@ const MessageContent: React.FC<Pick<MessageComponentProps, 'message' | 'image' |
             </button>
         )}
     </div>
-);
+    );
+}
 
 export default function MessageComponent({ id, message, image, index, moveMessage, draggable = false, onDelete }: MessageComponentProps) {
     if (draggable && typeof index !== 'undefined' && moveMessage) {
         return (
-            <DraggableMessage 
+            <DraggableMessage
                 id={id}
                 message={message}
                 image={image}

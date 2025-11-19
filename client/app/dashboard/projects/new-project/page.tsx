@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/hooks/use-auth';
+import { createAttachment } from '@/app/service/attachment-service';
 import { Folder, Plus, Trash2} from "lucide-react";
 import FileUpload from "@/app/components/FileUpload";
 import { Input } from "@/components/ui/input";
@@ -62,6 +64,8 @@ export default function NewProject() {
     const [newUnit, setNewUnit] = useState({ footage: '', price: '' });
     const [newLocation, setNewLocation] = useState({ name: '', distance: '' });
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+    const [attachments, setAttachments] = useState<{type: string; file: File}[]>([]);
+    const { user } = useAuth();
 
     const {
         register,
@@ -97,9 +101,25 @@ export default function NewProject() {
         );
     };
 
-    const onSubmit = async (data: FormData) => {
+    const handleFileSelect = (file: File | null, type: string) => {
+        if (!file) {
+            setAttachments(prev => prev.filter(att => att.type !== type));
+            return;
+        }
+        
+        setAttachments(prev => [
+            ...prev.filter(att => att.type !== type),
+            { type, file }
+        ]);
+    };
 
-        const formData = {
+    const onSubmit = async (data: FormData) => {
+        if (!user) {
+            console.error('Usuário não autenticado');
+            return;
+        }
+
+        const projectData = {
             ...data,
             type: selectedTypes,
             units: units.map(unit => ({
@@ -114,11 +134,33 @@ export default function NewProject() {
 
         try {
             setIsSubmitting(true);
-            const response = await createProject(formData);
-            console.log(response)
+            
+            // 1. Criar o projeto primeiro
+            const projectResponse = await createProject(projectData);
+            const projectId = projectResponse?.data?._id;
+            
+            if (!projectId) {
+                throw new Error('Falha ao criar o projeto: ID não retornado');
+            }
+
+            // 2. Fazer upload dos anexos em paralelo
+            if (attachments.length > 0) {
+                const uploadPromises = attachments.map(attachment => 
+                    createAttachment({
+                        file: attachment.file,
+                        name: `${projectData.info.name} - ${attachment.type}`,
+                        projectId,
+                        ownerId: user.id
+                    })
+                );
+                
+                await Promise.all(uploadPromises);
+            }
+            
             router.push('/dashboard/projects');
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Erro ao criar projeto ou enviar anexos:', error);
+            // Aqui você pode adicionar tratamento de erro mais detalhado
         } finally {
             setIsSubmitting(false);
         }
@@ -361,37 +403,25 @@ export default function NewProject() {
                                     <FileUpload
                                         label="Book do Projeto (PDF ou Imagens)"
                                         accept=".pdf,.jpg,.jpeg,.png"
-                                        onFileSelect={(file) => {
-                                            // Handle file selection
-                                            console.log('Book do Projeto selecionado:', file?.name);
-                                        }}
+                                        onFileSelect={(file) => handleFileSelect(file, 'book')}
                                     />
 
                                     <FileUpload
                                         label="Vídeo de Decorado (MP4, MOV)"
                                         accept=".mp4,.mov,.avi"
-                                        onFileSelect={(file) => {
-                                            // Handle file selection
-                                            console.log('Vídeo de Decorado selecionado:', file?.name);
-                                        }}
+                                        onFileSelect={(file) => handleFileSelect(file, 'video')}
                                     />
 
                                     <FileUpload
                                         label="Tabela de Pagamentos (PDF, Excel)"
                                         accept=".pdf,.xlsx,.xls"
-                                        onFileSelect={(file) => {
-                                            // Handle file selection
-                                            console.log('Tabela de Pagamentos selecionada:', file?.name);
-                                        }}
+                                        onFileSelect={(file) => handleFileSelect(file, 'payment_table')}
                                     />
 
                                     <FileUpload
                                         label="Outros Documentos (PDF, Word, Excel)"
                                         accept=".pdf,.doc,.docx,.xlsx,.xls"
-                                        onFileSelect={(file) => {
-                                            // Handle file selection
-                                            console.log('Outro documento selecionado:', file?.name);
-                                        }}
+                                        onFileSelect={(file) => handleFileSelect(file, 'other_docs')}
                                     />
                                 </div>
                             </Accordion>
@@ -406,9 +436,7 @@ export default function NewProject() {
                                     <FileUpload
                                         label="Importar nova base (CSV)"
                                         accept=".csv"
-                                        onFileSelect={(file) => {
-                                            console.log('Base selecionada:', file?.name);
-                                        }}
+                                        onFileSelect={(file) => handleFileSelect(file, 'client_base')}
                                     />
 
                                     <div>

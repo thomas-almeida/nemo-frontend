@@ -1,11 +1,12 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Send, House, Settings, Folder, LogOut, BadgePercent, MessageCircle,User } from "lucide-react";
+import { Send, House, Settings, Folder, LogOut, BadgePercent, MessageCircle, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
+import { sidebarOptions } from "../utils/sidebar-options";
 
 export default function SideBar() {
     const pathname = usePathname();
@@ -31,34 +32,16 @@ export default function SideBar() {
                 </Button>
             </Link>
             <ul className="py-4 flex flex-col gap-2">
-                <Link href="/dashboard" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
-                    <House className="h-4 w-4" />
-                    <li className="py-1">Home</li>
-                </Link>
-                <Link href="/dashboard/campaigns" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
-                    <Send className="h-4 w-4" />
-                    <li className="py-1">Campanhas</li>
-                </Link>
-                <Link href="/dashboard/projects" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
-                    <Folder className="h-4 w-4" />
-                    <li className="py-1">Projetos</li>
-                </Link>
-                <Link href="/dashboard/customers" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
-                    <User className="h-4 w-4" />
-                    <li className="py-1">Clientes</li>
-                </Link>
-                <Link href="/dashboard/messages" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
-                    <MessageCircle className="h-4 w-4" />
-                    <li className="py-1">Mensagens</li>
-                </Link>
-                <Link href="/dashboard/settings" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
-                    <BadgePercent className="h-4 w-4" />
-                    <li className="py-1">Planos</li>
-                </Link>
-                <Link href="/dashboard/settings" className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200">
-                    <Settings className="h-4 w-4" />
-                    <li className="py-1">Configurações</li>
-                </Link>
+                {sidebarOptions.map((option: any) => (
+                    <Link
+                        key={option.name}
+                        href={option.href}
+                        className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200"
+                    >
+                        <option.icon className="h-4 w-4" />
+                        <li className="py-1">{option.name}</li>
+                    </Link>
+                ))}
             </ul>
             <div className="absolute bottom-0 w-[90%]">
                 <div className="flex items-center gap-1 text-slate-800 mb-4 cursor-pointer">

@@ -96,11 +96,8 @@ export function ProjectDetailsSheet({ project, open, onOpenChange }: ProjectDeta
         </div>
 
         <SheetFooter className="mt-8">
-          <SheetClose asChild>
-            <Button type="button" variant="outline">Fechar</Button>
-          </SheetClose>
           <Button asChild>
-            <a href={`/dashboard/projects/${project._id}/edit`}>
+            <a href={`/dashboard/projects/${project._id}`}>
               Editar Projeto
             </a>
           </Button>

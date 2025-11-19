@@ -8,6 +8,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { NewCustomerSheet } from "./components/NewCustomerSheet"
+import { ImportCustomersSheet } from "./components/ImportCustomersSheet"
 
 export default function CustomersPage() {
     const { customers } = useCustomers()
@@ -61,7 +62,10 @@ export default function CustomersPage() {
                             onChange={(e) => setSearchValue(e.target.value)}
                         />
                     </div>
-                    <NewCustomerSheet />
+                    <div className="flex items-center gap-2">
+                        <NewCustomerSheet />
+                        <ImportCustomersSheet />
+                    </div>
                 </div>
             </div>
             

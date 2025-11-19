@@ -14,25 +14,40 @@ import Accordion from "@/app/components/Accordion";
 import { useProjects } from "@/app/hooks/use-projects";
 import { useMessages } from "@/app/hooks/use-messages";
 import { useCustomers } from "@/app/hooks/use-customers";
+import { useAttachments } from "@/app/hooks/use-attachments";
 import { SendingProgressModal } from "../../../components/SendingProgressModal";
 import { sendMessage } from "@/app/service/sender-service";
 import { useAuth } from "@/app/hooks/use-auth";
+
+interface Message {
+    id: number | string;
+    message: string;
+    image?: {
+        url: string;
+        type: string;
+        name: string;
+        publicLink: string;
+    };
+}
 
 export default function NewCampaign() {
 
     const { projects } = useProjects();
     const { messages: allMessages } = useMessages();
     const { customers } = useCustomers();
+    const { attachments: allAttachments } = useAttachments();
 
     const { user } = useAuth();
 
     const [numbers, setNumbers] = useState('');
     const [targetList, setTargetList] = useState<string>('select');
+    const [selectedProject, setSelectedProject] = useState<any>(null);
     const [selectedCustomers, setSelectedCustomers] = useState<any>([]);
-    const [image, setImage] = useState('')
+    const [selectedMedia, setSelectedMedia] = useState<any>(null)
     const [copy, setCopy] = useState('')
-    const [messages, setMessages] = useState<Array<{ id: number; message: string; image?: string }>>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [availableCopies, setAvailableCopies] = useState<Array<{ value: string; label: string }>>([]);
+    const [projectAttachments, setProjectAttachments] = useState<Array<{ value: string, label: string, type: string, isDocument: boolean }>>([]);
 
     const [allCustomers, setAllCustomers] = useState(customers);
 
@@ -58,6 +73,49 @@ export default function NewCampaign() {
     const [intervalMinutes, setIntervalMinutes] = useState(5);
     const [sendsPerRound, setSendsPerRound] = useState(5);
     const [project, setProject] = useState('');
+
+    // Atualiza os anexos quando o projeto é selecionado
+    useEffect(() => {
+        if (project) {
+            if (project === 'all') {
+                // Carrega todos os anexos quando nenhum projeto específico é selecionado
+                const allMediaOptions = allAttachments.map(attachment => {
+                    const projectName = projects.find(p => p._id === attachment.projectId)?.info?.name || 'Projeto';
+                    return {
+                        value: attachment.fileUrl,
+                        label: `${projectName} - ${attachment.name}`,
+                        type: attachment.type,
+                        isDocument: attachment.type === 'pdf' || attachment.type === 'doc' || attachment.type === 'docx' || attachment.type === 'xls' || attachment.type === 'xlsx',
+                        projectId: attachment.projectId
+                    };
+                });
+                setProjectAttachments(allMediaOptions);
+                setSelectedProject(null);
+            } else {
+                // Filtra os anexos do projeto selecionado
+                const currentProject = projects.find(p => p._id === project);
+                setSelectedProject(currentProject || null);
+
+                const projectAttachments = allAttachments.filter(
+                    attachment => attachment.projectId === project
+                );
+
+                // Mapeia os anexos para o formato do select
+                const mediaOptions = projectAttachments.map(attachment => ({
+                    value: attachment.fileUrl,
+                    label: attachment.name,
+                    type: attachment.type,
+                    isDocument: attachment.type === 'pdf' || attachment.type === 'doc' || attachment.type === 'docx' || attachment.type === 'xls' || attachment.type === 'xlsx',
+                    projectId: attachment.projectId
+                }));
+
+                setProjectAttachments(mediaOptions);
+            }
+        } else {
+            setSelectedProject(null);
+            setProjectAttachments([]);
+        }
+    }, [project, projects, allAttachments]);
 
     // Carrega as cópias disponíveis quando um projeto é selecionado
     useEffect(() => {
@@ -258,29 +316,86 @@ export default function NewCampaign() {
 
                                     <div className="py-2">
                                         <div className="p-2 my-2 border border-slate-300 rounded">
-                                            <h4>Imagem (Opcional)</h4>
-                                            <div>
-                                                {
-                                                    image !== "" &&
-                                                    (
-                                                        <Image
-                                                            src={image}
-                                                            alt="Imagem"
-                                                            width={150}
-                                                            height={150}
-                                                            className="w-full rounded mb-2"
-                                                        />
-                                                    )
-                                                }
+                                            <h4>Mídia (Opcional)</h4>
+                                            <div className="space-y-4">
+                                                {selectedMedia && (
+                                                    <div className="relative border rounded-lg p-3">
+                                                        {selectedMedia.type?.includes("image/") ? (
+                                                            <Image
+                                                                src={selectedMedia.publicLink}
+                                                                alt="Mídia selecionada"
+                                                                width={200}
+                                                                height={200}
+                                                                className="w-full h-auto max-h-40 object-contain rounded"
+                                                            />
+                                                        ) : (
+                                                            <div className="p-4 bg-muted/50 rounded flex items-center">
+                                                                <div className="bg-primary/10 p-3 rounded-full mr-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                                    </svg>
+                                                                </div>
+                                                                <div className="truncate">
+                                                                    <p className="font-medium truncate">{selectedMedia.name}</p>
+                                                                    <p className="text-xs text-muted-foreground">Arquivo {selectedMedia.type.toUpperCase()}</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setSelectedMedia(null)
+                                                            }}
+                                                            className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 hover:bg-destructive/90"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                )}
 
                                                 <Select
                                                     options={[
                                                         { value: '', label: 'Nenhuma' },
-                                                        { value: 'https://pinbarrafunda.site/assets/images/pin-book-a3-69-1.webp', label: 'Imagem Teste' },
+                                                        ...projectAttachments.map(att => ({
+                                                            ...att,
+                                                            label: `${att.label} (${att.type.toUpperCase()})`
+                                                        }))
                                                     ]}
-                                                    value={image}
-                                                    onChange={(value) => setImage(value)}
+                                                    value={selectedMedia?.url || ''}
+                                                    onChange={(value) => {
+                                                        if (!value) {
+                                                            setSelectedMedia(null);
+                                                            return;
+                                                        }
+                                                        const media = projectAttachments.find(a => a.value === value);
+                                                        if (media) {
+                                                            const attachment = allAttachments.find(a => a.fileUrl === media.value);
+                                                            setSelectedMedia({
+                                                                url: media.value,
+                                                                type: media.isDocument ? 'document' : media.type,
+                                                                name: media.label,
+                                                                publicLink: attachment?.publicLink
+                                                            });
+                                                            console.log({
+                                                                url: media.value,
+                                                                type: media.isDocument ? 'document' : media.type,
+                                                                name: media.label,
+                                                                publicLink: attachment?.publicLink
+                                                            })
+                                                        }
+                                                    }}
+                                                    placeholder="Selecione uma mídia do projeto"
                                                 />
+                                                {projectAttachments.length === 0 && project && (
+                                                    <p className="text-xs text-muted-foreground mt-1">
+                                                        Nenhum anexo encontrado para este projeto.
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
 
@@ -291,7 +406,7 @@ export default function NewCampaign() {
                                                 (
                                                     <div>
                                                         <MessageComponent
-                                                            message={copy || (image ? '' : 'Prévia da mensagem aparecerá aqui')}
+                                                            message={copy || (selectedMedia ? '' : 'Prévia da mensagem aparecerá aqui')}
                                                             draggable={false}
                                                         />
                                                     </div>
@@ -309,17 +424,24 @@ export default function NewCampaign() {
                                             <Button
                                                 className="w-full cursor-pointer mt-2"
                                                 onClick={() => {
-                                                    if (!copy && !image) return;
-                                                    const newMessage = {
+                                                    if (!copy && !selectedMedia) return;
+                                                    const newMessage: Message = {
                                                         id: Date.now(),
-                                                        message: copy || '',
-                                                        ...(image && { image })
+                                                        message: copy,
+                                                        ...(selectedMedia && {
+                                                            image: {
+                                                                url: selectedMedia.url,
+                                                                type: selectedMedia.type,
+                                                                name: selectedMedia.name,
+                                                                publicLink: selectedMedia.publicLink
+                                                            }
+                                                        })
                                                     };
                                                     setMessages(prev => [...prev, newMessage]);
                                                     setCopy('');
-                                                    setImage('');
+                                                    setSelectedMedia(null);
                                                 }}
-                                                disabled={!copy && !image}
+                                                disabled={!copy && !selectedMedia}
                                             >
                                                 Adicionar Mensagem
                                                 <Plus className="h-4 w-4 ml-2" />
