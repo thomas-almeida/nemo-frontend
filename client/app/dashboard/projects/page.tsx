@@ -9,8 +9,8 @@ import { useState, useMemo } from "react"
 import { columns } from "@/app/utils/project-columns"
 import TypeFilter from "@/app/components/TypeFilter"
 import { SearchBar } from "@/app/components/ui/search-bar"
-import { ProjectDetailsSheet } from "@/app/components/ProjectDetailsSheet"
 import { Project } from "@/app/types/project"
+import { useRouter } from "next/navigation"
 
 export default function ProjectsPage() {
 
@@ -18,6 +18,8 @@ export default function ProjectsPage() {
   const [typeFilter, setTypeFilter] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+
+  const router = useRouter()
 
   const filteredProjects = useMemo(() => {
     return projects.filter(project => {
@@ -61,7 +63,7 @@ export default function ProjectsPage() {
             onChange={setSearchTerm}
             className="flex-1"
           />
-          <TypeFilter 
+          <TypeFilter
             value={typeFilter}
             onChange={setTypeFilter}
             availableTypes={projects.map(p => p.type || [])}
@@ -70,13 +72,9 @@ export default function ProjectsPage() {
         <DataTable
           columns={columns}
           data={filteredProjects}
-          onRowClick={(row) => setSelectedProject(row as Project)}
-        />
-
-        <ProjectDetailsSheet
-          project={selectedProject}
-          open={!!selectedProject}
-          onOpenChange={(open) => !open && setSelectedProject(null)}
+          onRowClick={(row) =>
+            router.push(`/dashboard/projects/${row._id}`)
+          }
         />
       </div>
 

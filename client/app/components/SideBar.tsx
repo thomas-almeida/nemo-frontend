@@ -20,7 +20,7 @@ export default function SideBar() {
         <div className="fixed flex flex-col h-screen p-4 px-2 border-r border-gray-300 bg-white w-45 z-10">
             <div>
                 <div className="flex items-center gap-1 text-slate-800 mb-4">
-                    <h1 className="font-semibold text-lg">Maestro</h1>
+                    <h1 className="font-bold text-lg">OCTO</h1>
                 </div>
             </div>
             <Link href="/dashboard/campaigns/new-campaign">
