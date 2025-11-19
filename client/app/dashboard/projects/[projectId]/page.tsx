@@ -403,7 +403,7 @@ export default function ProjectPage() {
                         <CardTitle>Materiais</CardTitle>
                         <CardDescription>Materiais de apoio rápido para enviar para seus clientes durante o atendimento</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6 grid grid-cols-2 gap-4 p-2">
+                    <CardContent className="space-y-6 p-2">
                         {/* Seção de Upload */}
                         <div className="p-4">
                             <h3 className="font-medium mb-4">Adicionar Novo Material</h3>
@@ -425,9 +425,9 @@ export default function ProjectPage() {
 
                         {/* Lista de Anexos */}
                         {attachmentList && attachmentList.length > 0 ? (
-                            <div className="space-y-3">
+                            <div className="space-y-3 ">
                                 <h4 className="font-medium">Materiais Disponíveis</h4>
-                                <div className="space-y-2">
+                                <div className="space-y-2 grid grid-cols-2 gap-2">
                                     {attachmentList.map((attachment: any) => (
                                         <div
                                             key={attachment._id}
@@ -458,10 +458,10 @@ export default function ProjectPage() {
                                 <p className="text-sm">Use o formulário acima para adicionar arquivos.</p>
                             </div>
                         )}
+
                     </CardContent>
                 </Card>
             </div>
-
         </div>
     )
 }
