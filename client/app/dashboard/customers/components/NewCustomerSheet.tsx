@@ -41,7 +41,7 @@ export function NewCustomerSheet({ children }: NewCustomerSheetProps) {
     } = useForm<FormData>({
         defaultValues: {
             name: '',
-            phone: ''
+            phone: '',
         },
         mode: 'onChange'
     })

@@ -20,12 +20,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   onRowClick?: (row: TData) => void
+  renderRowActions?: (row: TData) => React.ReactNode
 }
 
 export default function DataTable<TData, TValue>({
   columns,
   data,
   onRowClick,
+  renderRowActions,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -60,14 +62,24 @@ export default function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => onRowClick?.(row.original)}
-                className={onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}
+                className={onRowClick ? "group" : ""}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell 
+                    key={cell.id}
+                    onClick={() => onRowClick?.(row.original)}
+                    className={onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
+                {renderRowActions && (
+                  <TableCell className="text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex justify-end">
+                      {renderRowActions(row.original)}
+                    </div>
+                  </TableCell>
+                )}
               </TableRow>
             ))
           ) : (

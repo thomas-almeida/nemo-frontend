@@ -440,12 +440,12 @@ export default function ProjectPage() {
                                                 </p>
                                             </div>
                                             <Link
-                                                href={attachment.fileUrl}
+                                                href={attachment.publicLink}
                                                 target="_blank"
                                                 download
                                             >
                                                 <Button variant="outline" size="sm" className="shrink-0">
-                                                    Baixar
+                                                    Ver Material
                                                 </Button>
                                             </Link>
                                         </div>

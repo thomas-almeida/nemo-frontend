@@ -2,34 +2,30 @@
 
 import { Row } from "@tanstack/react-table";
 
-interface Unit {
-  footage: number;
-  price: number;
+interface Customer {
   _id: string;
+  name: string;
+  phone: string;
+  labels?: string[];
+  stage: string;
 }
 
-interface Project {
-  info: {
-    name: string;
-    address: string;
-    developer: string;
-    releaseDate: string;
-  };
-  type: string[];
-  units: Unit[];
-}
-
-export default function UnitBadge({ row }: { row: Row<Project> }) {
-  const units = row.original.units || [];
+export default function UnitBadge({ row }: { row: Row<Customer> }) {
+  const labels = row.original.labels || [];
+  
+  if (labels.length === 0) {
+    return <span className="text-sm text-muted-foreground">Sem etiquetas</span>;
+  }
   
   return (
-    <div className="flex gap-1">
-      {units.map((unit) => (
-        <div key={unit._id} className="flex items-center gap-2">
-          <span className="px-2 py-1 text-xs rounded-full bg-muted">
-            {unit.footage}m²
-          </span>
-        </div>
+    <div className="flex flex-wrap gap-1">
+      {labels.map((label, index) => (
+        <span 
+          key={`${row.original._id}-${index}`} 
+          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+        >
+          {label}
+        </span>
       ))}
     </div>
   );

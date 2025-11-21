@@ -22,3 +22,13 @@ export const getAllCustomers = async (userId: string) => {
     const response = await axios.get(`${API_URL}/customer/${userId}`)
     return response.data
 }
+
+export const updateCustomer = async (customerId: string, payload: any) => {
+    const response = await axios.put(`${API_URL}/customer/${customerId}`, payload)
+    return response.data
+}
+
+export const deleteCustomer = async (customerId: string) => {
+    const response = await axios.delete(`${API_URL}/customer/${customerId}`)
+    return response.data
+}

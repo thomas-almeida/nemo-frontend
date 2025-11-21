@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import TypeCell from "../components/TypeCell";
-import UnitBadge from "../components/UnitBadge";
+import UnitCountBadge from "../components/UnitCountBadge";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -29,14 +29,15 @@ export const columns: ColumnDef<any>[] = [
   },
   {
     id: "units",
-    header: "Unidades" as const,
+    header: "Unidades",
     cell: (info) => {
-      return <UnitBadge row={info.row} />;
+      const units = info.row.original.units || [];
+      return <UnitCountBadge units={units} />;
     },
   },
   {
     id: "averagePrice",
-    header: "Preço Médio" as const,
+    header: "Preço Médio",
     cell: (info) => {
       const units = info.row.original.units || [];
       if (units.length === 0) return '-';
