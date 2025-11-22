@@ -35,7 +35,7 @@ export default function RootLayout({
               )
             }
             <div className="w-full h-full overflow-y-auto flex justify-center items-start">
-              <div className="w-[90%]">
+              <div className="">
                 {children}
               </div>
             </div>
