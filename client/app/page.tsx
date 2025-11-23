@@ -107,7 +107,7 @@ export default function LandingPage() {
           alt="WhatsApp" 
           width={32} 
           height={32} 
-          className="w-8 h-8"
+          className="w-9 h-9"
         />
       </a>
       <div className="w-[80%] md:w-auto">
@@ -225,11 +225,11 @@ export default function LandingPage() {
 
               <div className="w-full flex justify-center items-center">
                 <Image
-                  src="/shots-2.png"
+                  src="/shots/shots-001.png"
                   width={1000}
                   height={100}
                   alt="Hero"
-                  className="transition-all duration-300 hover:scale-105"
+                  className="transition-all duration-300 hover:scale-115"
                 />
               </div>
             </div>
