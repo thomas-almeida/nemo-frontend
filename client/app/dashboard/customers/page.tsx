@@ -1,13 +1,20 @@
 "use client"
 
 import { useCustomers } from "@/app/hooks/use-customers"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useAuth } from "@/app/hooks/use-auth"
 import { getAllCustomers } from "@/app/service/customer-service"
 import useCustomerStore from "@/app/store/customer-store"
 import DataTable from "@/app/components/DataTable"
-import { Search } from "lucide-react"
+import { Search, X } from "lucide-react"
 import { ColumnDef } from "@tanstack/react-table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { NewCustomerSheet } from "./components/NewCustomerSheet"
@@ -21,21 +28,43 @@ export default function CustomersPage() {
     const { customers } = useCustomers()
     const { user } = useAuth()
     const [searchValue, setSearchValue] = useState('')
+    const [selectedLabel, setSelectedLabel] = useState<string>('')
+    const [selectedStage, setSelectedStage] = useState<string>('')
+    const [availableLabels, setAvailableLabels] = useState<string[]>([])
     const [editingCustomer, setEditingCustomer] = useState<any>(null)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [messagingCustomer, setMessagingCustomer] = useState<any>(null)
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
 
-    const filteredCustomers = useMemo(() => {
-        if (!searchValue) return customers;
+    // Extract all unique labels from customers
+    useEffect(() => {
+        const labels = new Set<string>();
+        customers.forEach(customer => {
+            if (customer.labels && Array.isArray(customer.labels)) {
+                customer.labels.forEach((label: string) => labels.add(label));
+            }
+        });
+        setAvailableLabels(Array.from(labels).sort());
+    }, [customers]);
 
-        const searchLower = searchValue.toLowerCase();
-        return customers.filter(customer =>
-            customer.name?.toLowerCase().includes(searchLower) ||
-            customer.email?.toLowerCase().includes(searchLower) ||
-            customer.phone?.toLowerCase().includes(searchLower)
-        );
-    }, [customers, searchValue]);
+    const filteredCustomers = useMemo(() => {
+        return customers.filter(customer => {
+            // Search filter
+            const matchesSearch = !searchValue || 
+                customer.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                customer.email?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                customer.phone?.toLowerCase().includes(searchValue.toLowerCase());
+            
+            // Label filter
+            const matchesLabel = selectedLabel === 'all' || !selectedLabel || 
+                (customer.labels && customer.labels.includes(selectedLabel));
+            
+            // Stage filter
+            const matchesStage = selectedStage === 'all' || !selectedStage || customer.stage === selectedStage;
+            
+            return matchesSearch && matchesLabel && matchesStage;
+        });
+    }, [customers, searchValue, selectedLabel, selectedStage]);
 
     const columns: ColumnDef<any>[] = [
         {
@@ -122,15 +151,72 @@ export default function CustomersPage() {
                     <p className="text-muted-foreground">Gerencie seus clientes</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Buscar clientes..."
-                            className="w-full pl-8 sm:w-[200px] md:w-[300px]"
-                            value={searchValue}
-                            onChange={(e) => setSearchValue(e.target.value)}
-                        />
+                    <div className="flex flex-wrap gap-2 w-full">
+                        <div className="relative flex-1 min-w-[200px]">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="search"
+                                placeholder="Buscar clientes..."
+                                className="w-full pl-8"
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                            />
+                        </div>
+                        
+                        <div className="w-full sm:w-[200px]">
+                            <Select
+                                value={selectedLabel || undefined}
+                                onValueChange={(value) => setSelectedLabel(value || '')}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Filtrar por etiqueta" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todas as etiquetas</SelectItem>
+                                    {availableLabels.map((label) => (
+                                        <SelectItem key={label} value={label}>
+                                            {label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="w-full sm:w-[200px]">
+                            <Select
+                                value={selectedStage || undefined}
+                                onValueChange={(value) => setSelectedStage(value || '')}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Filtrar por etapa" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todas as etapas</SelectItem>
+                                    <SelectItem value="Aguardando Contato">Aguardando Contato</SelectItem>
+                                    <SelectItem value="Primeiro Contato">Primeiro Contato</SelectItem>
+                                    <SelectItem value="Esteira Encantamento">Esteira Encantamento</SelectItem>
+                                    <SelectItem value="Negociação">Negociação</SelectItem>
+                                    <SelectItem value="Rodando Contrato">Rodando Contrato</SelectItem>
+                                    <SelectItem value="Vendido">Vendido</SelectItem>
+                                    <SelectItem value="Perdido">Perdido</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {(selectedLabel || selectedStage) && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    setSelectedLabel('');
+                                    setSelectedStage('');
+                                }}
+                                className="h-10 px-3"
+                            >
+                                <X className="h-4 w-4 mr-1" />
+                                Limpar filtros
+                            </Button>
+                        )}
                     </div>
                     <div className="flex items-center gap-2">
                         <NewCustomerSheet />
