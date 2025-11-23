@@ -110,7 +110,7 @@ export default function LandingPage() {
           className="w-8 h-8"
         />
       </a>
-      <div className="">
+      <div className="border w-[80%] md:w-auto">
         {/* Header */}
         <header className="fixed px-12 inset-x-0 top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
           <div className="w-full h-16 flex items-center justify-between">
@@ -283,11 +283,11 @@ export default function LandingPage() {
 
           {/* Features Section */}
           <section id="funcionalidades" className="p-12 flex justify-center items-center bg-green-400/6">
-            <div className="w-[75%] md:w-[65%] mx-auto">
+            <div className="md:w-[70%] mx-auto">
               <div className="flex justify-center items-start gap-10 mb-24">
 
                 <div className="space-y-8">
-                  <div className="grid grid-cols-2 items-center gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-8">
                     <div>
                       <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none text-sm px-3 py-1">
                         Quem se antecipa, Governa!
@@ -360,7 +360,7 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="max-w-4xl mx-auto">
+              <div className="hidden md:block max-w-4xl mx-auto">
                 <div className="bg-background rounded-xl shadow-2xl border border-border overflow-hidden relative group">
                   {/* Mock Interface Header */}
                   <div className="border-b border-border p-4 flex items-center gap-4 bg-muted/5">
@@ -465,7 +465,7 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              <div className="w-[80%] md:w-auto grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
 
                 {/* Mensal */}
                 <Card className="flex flex-col h-full rounded-lg border backdrop-blur-sm hover:border-primary/50 transition-all ">
@@ -511,7 +511,7 @@ export default function LandingPage() {
                       </ul>
                     </div>
 
-                    <div className="mt-8 pt-4 border-t border-border absolute bottom-8 w-[300px]">
+                    <div className="mt-8 pt-4 border-t border-border md:absolute bottom-8 md:w-[300px]">
                       <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 text-base cursor-pointer">
                         Começar Agora
                       </Button>
@@ -552,7 +552,7 @@ export default function LandingPage() {
                       </ul>
                     </div>
 
-                    <div className="mt-8 pt-4 border-t border-border absolute bottom-8 w-[300px]">
+                    <div className="mt-8 pt-4 border-t border-border md:absolute md:bottom-8 md:w-[300px]">
                       <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 text-base cursor-pointer">
                         Começar Agora
                       </Button>
@@ -715,7 +715,7 @@ export default function LandingPage() {
           <section id="faq"></section>
 
           <section className="py-20 my-20 flex justify-center items-center">
-            <div className="w-[80%] px-6 md:px-12 grid grid-cols-2 gap-4">
+            <div className="md:w-[80%] px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="text-left">
                 <MessageCircleQuestionMark className="w-10 h-10 text-primary mb-2" />
                 <h2 className="text-3xl font-bold my-2">Ainda com dúvidas se a Octo é pra você?</h2>
@@ -723,7 +723,7 @@ export default function LandingPage() {
                   <p>Faz sentido usar a Octo?</p>
                   <p>Foi feita pra mim?</p>
                 </h4>
-                <p className="w-[70%]">Essas são as perguntas que nossos clientes mais fazem, temos certeza que elas podem ajudar a tirar as suas dúvidas, caso ainda tenha perguntas, fale conosco.</p>
+                <p className="md:w-[70%]">Essas são as perguntas que nossos clientes mais fazem, temos certeza que elas podem ajudar a tirar as suas dúvidas, caso ainda tenha perguntas, fale conosco.</p>
               </div>
               <div className="">
                 <Accordion title="O que é a Octo e pra quem ela serve?">
