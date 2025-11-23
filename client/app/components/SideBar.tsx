@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import { sidebarOptions } from "../utils/sidebar-options";
+import { OctomiLogo } from "./OctomiLogo";
 
 export default function SideBar() {
     const pathname = usePathname();
@@ -19,9 +20,11 @@ export default function SideBar() {
     return (
         <div className="fixed flex flex-col h-screen p-4 px-2 border-r border-gray-300 bg-white w-45 z-10">
             <div>
-                <div className="flex items-center gap-1 text-slate-800 mb-4">
-                    <h1 className="font-bold text-lg">OCTO</h1>
-                </div>
+                <Link href="/dashboard">
+                    <div className="flex items-center gap-1 text-slate-800 mb-4 cursor-pointer">
+                        <OctomiLogo />
+                    </div>
+                </Link>
             </div>
             <Link href="/dashboard/campaigns/new-campaign">
                 <Button
@@ -38,7 +41,7 @@ export default function SideBar() {
                         href={option.href}
                         className="flex justify-start items-center gap-1 px-2 rounded-sm hover:bg-gray-200"
                     >
-                        <option.icon className="h-4 w-4" />
+                        <option.icon className="h-4 w-4 text-primary" />
                         <li className="py-1">{option.name}</li>
                     </Link>
                 ))}

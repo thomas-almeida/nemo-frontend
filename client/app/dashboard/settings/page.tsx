@@ -23,7 +23,7 @@ export default function SettingsPage() {
 
     return (
         <div className="flex justify-center items-start h-screen w-full py-4">
-            <div className="w-[80%] p-4">
+            <div className="w-[90%] p-4">
                 <div className="flex items-center gap-1">
                     <Settings className="h-5 w-5" />
                     <h1 className="text-xl font-semibold">Configurações</h1>

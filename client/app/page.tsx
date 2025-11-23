@@ -188,7 +188,7 @@ export default function LandingPage() {
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-8 max-w-5xl mx-auto">
                 <p>Corretor, chega de:</p>
                 <span
-                  className={`text-primary font-normal italic bg-primary/10 px-2 rounded-lg inline-block transform -rotate-1 transition-opacity duration-500 ${fade ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-primary font-medium italic bg-primary/10 px-2 rounded-lg inline-block transform -rotate-1 transition-opacity duration-500 ${fade ? 'opacity-100' : 'opacity-0'}`}
                 >
                   {questions[currentQuestionIndex]}
                 </span>

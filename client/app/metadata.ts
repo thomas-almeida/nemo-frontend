@@ -1,5 +1,4 @@
-import { Metadata, Viewport } from 'next';
-import ClientLayout from './client-layout';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
@@ -56,18 +55,10 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
+export const viewport = {
   themeColor: '#ffffff',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
 };
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <ClientLayout>{children}</ClientLayout>;
-}

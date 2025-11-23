@@ -9,11 +9,11 @@ import DataTable from "@/app/components/DataTable"
 import { Search, X } from "lucide-react"
 import { ColumnDef } from "@tanstack/react-table"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -50,18 +50,18 @@ export default function CustomersPage() {
     const filteredCustomers = useMemo(() => {
         return customers.filter(customer => {
             // Search filter
-            const matchesSearch = !searchValue || 
+            const matchesSearch = !searchValue ||
                 customer.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
                 customer.email?.toLowerCase().includes(searchValue.toLowerCase()) ||
                 customer.phone?.toLowerCase().includes(searchValue.toLowerCase());
-            
+
             // Label filter
-            const matchesLabel = selectedLabel === 'all' || !selectedLabel || 
+            const matchesLabel = selectedLabel === 'all' || !selectedLabel ||
                 (customer.labels && customer.labels.includes(selectedLabel));
-            
+
             // Stage filter
             const matchesStage = selectedStage === 'all' || !selectedStage || customer.stage === selectedStage;
-            
+
             return matchesSearch && matchesLabel && matchesStage;
         });
     }, [customers, searchValue, selectedLabel, selectedStage]);
@@ -97,7 +97,7 @@ export default function CustomersPage() {
             header: "Etapa de funil",
             cell: ({ row }) => {
                 const stage = row.getValue("stage") as string;
-                
+
                 // Define colors for each stage
                 const stageColors: Record<string, string> = {
                     'Aguardando Contato': 'bg-blue-100 text-blue-800 border-blue-200',
@@ -144,80 +144,13 @@ export default function CustomersPage() {
     // Removed renderRowActions since we've added the actions directly in the columns
 
     return (
-        <div className="container mx-auto py-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="container mx-auto py-6 w-[90%]">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 ">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
                     <p className="text-muted-foreground">Gerencie seus clientes</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    <div className="flex flex-wrap gap-2 w-full">
-                        <div className="relative flex-1 min-w-[200px]">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder="Buscar clientes..."
-                                className="w-full pl-8"
-                                value={searchValue}
-                                onChange={(e) => setSearchValue(e.target.value)}
-                            />
-                        </div>
-                        
-                        <div className="w-full sm:w-[200px]">
-                            <Select
-                                value={selectedLabel || undefined}
-                                onValueChange={(value) => setSelectedLabel(value || '')}
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Filtrar por etiqueta" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Todas as etiquetas</SelectItem>
-                                    {availableLabels.map((label) => (
-                                        <SelectItem key={label} value={label}>
-                                            {label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="w-full sm:w-[200px]">
-                            <Select
-                                value={selectedStage || undefined}
-                                onValueChange={(value) => setSelectedStage(value || '')}
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Filtrar por etapa" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Todas as etapas</SelectItem>
-                                    <SelectItem value="Aguardando Contato">Aguardando Contato</SelectItem>
-                                    <SelectItem value="Primeiro Contato">Primeiro Contato</SelectItem>
-                                    <SelectItem value="Esteira Encantamento">Esteira Encantamento</SelectItem>
-                                    <SelectItem value="Negociação">Negociação</SelectItem>
-                                    <SelectItem value="Rodando Contrato">Rodando Contrato</SelectItem>
-                                    <SelectItem value="Vendido">Vendido</SelectItem>
-                                    <SelectItem value="Perdido">Perdido</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {(selectedLabel || selectedStage) && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                    setSelectedLabel('');
-                                    setSelectedStage('');
-                                }}
-                                className="h-10 px-3"
-                            >
-                                <X className="h-4 w-4 mr-1" />
-                                Limpar filtros
-                            </Button>
-                        )}
-                    </div>
                     <div className="flex items-center gap-2">
                         <NewCustomerSheet />
                         <ImportCustomersSheet />
@@ -246,6 +179,75 @@ export default function CustomersPage() {
                             onOpenChange={setIsMessageModalOpen}
                         />
                     </div>
+                </div>
+            </div>
+            <div className="py-6">
+                <div className="flex flex-wrap gap-2 w-full">
+                    <div className="relative flex-1 min-w-[200px]">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Buscar clientes..."
+                            className="w-full pl-8"
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="w-full sm:w-[200px]">
+                        <Select
+                            value={selectedLabel || undefined}
+                            onValueChange={(value) => setSelectedLabel(value || '')}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Filtrar por etiqueta" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Todas as etiquetas</SelectItem>
+                                {availableLabels.map((label) => (
+                                    <SelectItem key={label} value={label}>
+                                        {label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="w-full sm:w-[200px]">
+                        <Select
+                            value={selectedStage || undefined}
+                            onValueChange={(value) => setSelectedStage(value || '')}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Filtrar por etapa" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Todas as etapas</SelectItem>
+                                <SelectItem value="Aguardando Contato">Aguardando Contato</SelectItem>
+                                <SelectItem value="Primeiro Contato">Primeiro Contato</SelectItem>
+                                <SelectItem value="Esteira Encantamento">Esteira Encantamento</SelectItem>
+                                <SelectItem value="Negociação">Negociação</SelectItem>
+                                <SelectItem value="Rodando Contrato">Rodando Contrato</SelectItem>
+                                <SelectItem value="Vendido">Vendido</SelectItem>
+                                <SelectItem value="Perdido">Perdido</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {(selectedLabel || selectedStage) && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                setSelectedLabel('');
+                                setSelectedStage('');
+                            }}
+                            className="h-10 px-3"
+                        >
+                            <X className="h-4 w-4 mr-1" />
+                            Limpar filtros
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -277,7 +279,7 @@ export default function CustomersPage() {
                             })
                             setIsEditModalOpen(true)
                         }}
-                        // Removed renderRowActions prop since we're using a dedicated actions column
+                    // Removed renderRowActions prop since we're using a dedicated actions column
                     />
                 )}
             </div>
