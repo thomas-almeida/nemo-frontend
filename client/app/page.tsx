@@ -110,7 +110,7 @@ export default function LandingPage() {
           className="w-8 h-8"
         />
       </a>
-      <div className="border w-[80%] md:w-auto">
+      <div className="w-[80%] md:w-auto">
         {/* Header */}
         <header className="fixed px-12 inset-x-0 top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
           <div className="w-full h-16 flex items-center justify-between">
