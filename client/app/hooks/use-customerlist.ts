@@ -14,7 +14,7 @@ export function useCustomerList() {
             if (user.id) {
                 try {
                     const customerListsData = await getCustomerListsByOwnerId(user.id);
-                    useCustomerListStore.setState({ customerLists: customerListsData });
+                    useCustomerListStore.setState({ customerLists: customerListsData.data });
                 } catch (error) {
                     console.error(error);
                 }

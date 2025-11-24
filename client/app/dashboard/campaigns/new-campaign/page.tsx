@@ -2,9 +2,8 @@
 
 import { Send, Goal, Plus, CalendarCheck2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { formatPhoneNumber } from "@/lib/phone-utils";
-import Spinner from "@/app/components/Spinner";
 import Select from "@/app/components/Select";
 import MessageComponent from "@/app/components/MessageComponent";
 import { DndProvider } from 'react-dnd';
@@ -18,6 +17,7 @@ import { useAttachments } from "@/app/hooks/use-attachments";
 import { SendingProgressModal } from "../../../components/SendingProgressModal";
 import { sendMessage } from "@/app/service/sender-service";
 import { useAuth } from "@/app/hooks/use-auth";
+import { useCustomerList } from "@/app/hooks/use-customerlist";
 
 interface Message {
     id: number | string;
@@ -36,6 +36,7 @@ export default function NewCampaign() {
     const { messages: allMessages } = useMessages();
     const { customers } = useCustomers();
     const { attachments: allAttachments } = useAttachments();
+    const { customerLists } = useCustomerList();
 
     const { user } = useAuth();
 
@@ -73,6 +74,7 @@ export default function NewCampaign() {
     const [intervalMinutes, setIntervalMinutes] = useState(5);
     const [sendsPerRound, setSendsPerRound] = useState(5);
     const [project, setProject] = useState('');
+    const [customerListArr, setCustomerListArr] = useState<any>([]);
 
     // Atualiza os anexos quando o projeto é selecionado
     useEffect(() => {
@@ -147,6 +149,25 @@ export default function NewCampaign() {
         }
     }, [project, allMessages]);
 
+    useEffect(() => {
+        if (customerLists) {
+            // Mapeia diretamente os customerLists para o formato desejado
+            const mappedLists = customerLists.map((list: any) => ({
+                value: list._id,
+                label: list.name
+            }));
+
+            // Atualiza o estado uma única vez com todos os itens
+            setCustomerListArr(mappedLists);
+        }
+    }, [customerLists]); // Removemos customers das dependências já que não está sendo usado
+
+    function getCustomersFromId(id: string) {
+        setTargetList(id); // Atualiza o estado do select
+        const list = customerLists.find((list: any) => list._id === id);
+        setSelectedCustomers(list?.customers || []);
+    }
+
     async function send() {
         if (selectedCustomers.length === 0) {
             alert('Selecione pelo menos um contato para enviar a campanha.');
@@ -195,7 +216,6 @@ export default function NewCampaign() {
                     const response = await sendMessage(user.sessionId, formattedPhone, newMsgFormatt);
 
                     if (response) {
-                        console.log(`[${i + 1}/${numbers.length}] Enviado para: ${formattedPhone}`);
                         setSentNumbers(prev => [...prev, formattedPhone]);
                     }
 
@@ -216,7 +236,6 @@ export default function NewCampaign() {
                 const nextBatchNumber = batchNumber + 1;
                 setTimeout(() => sendBatch(currentIndex, nextBatchNumber), intervalMs);
             } else {
-                console.log('\n--- Todos os envios foram concluídos! ---');
                 setIsSending(false);
             }
         };
@@ -292,15 +311,15 @@ export default function NewCampaign() {
                             <p className="text-sm text-slate-500 mb-3">Selecione a lista alvo</p>
                             <Select
                                 options={[
-                                    { value: 'select', label: 'Selecione' },
-                                    { value: 'all', label: 'Toda Minha Base' },
+                                    { value: '', label: 'Selecione' },
+                                    ...customerListArr
                                 ]}
                                 value={targetList}
                                 onChange={(value) => {
-                                    setTargetList(value);
-                                    if (value === 'all') {
-                                        setSelectedCustomers(allCustomers);
+                                    if (value) {
+                                        getCustomersFromId(value);
                                     } else {
+                                        setTargetList('');
                                         setSelectedCustomers([]);
                                     }
                                 }}

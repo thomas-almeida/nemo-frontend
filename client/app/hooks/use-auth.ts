@@ -17,7 +17,6 @@ export function useAuth() {
           setError(null);
 
           const userData = await getUserById(session.user.id);
-          console.log(userData)
 
           if (userData) {
 
@@ -34,7 +33,7 @@ export function useAuth() {
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to fetch user data';
-          console.error(errorMessage, error);
+
           setError(errorMessage);
           setUser({
             id: '',
