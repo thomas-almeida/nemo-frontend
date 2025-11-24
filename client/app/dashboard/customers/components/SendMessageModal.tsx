@@ -136,18 +136,21 @@ export function SendMessageModal({ customer, open, onOpenChange }: SendMessageMo
     if (!open) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50 p-4"
+            onClick={() => onOpenChange(false)}
+        >
             <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center p-4 border-b">
                     <h2 className="text-xl font-semibold">Enviar Mensagem para {customer?.name}</h2>
-                    <button 
+                    <button
                         onClick={() => onOpenChange(false)}
                         className="text-gray-500 hover:text-gray-700"
                     >
                         <X className="h-5 w-5" />
                     </button>
                 </div>
-                
+
                 <div className="p-4 overflow-y-auto flex-1">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-4">
