@@ -1,4 +1,4 @@
-import { House, BadgePercent, Folder, MessageCircle, Settings, User } from "lucide-react"
+import { House, BadgePercent, Folder, MessageCircle, Settings, User, UserStar } from "lucide-react"
 
 export const sidebarOptions = [
     {
@@ -20,6 +20,11 @@ export const sidebarOptions = [
         name: "Mensagens",
         href: "/dashboard/messages",
         icon: MessageCircle
+    },
+    {
+        name: "Gerar Leads",
+        href: "#",
+        icon: UserStar
     },
     {
         name: "Planos",
