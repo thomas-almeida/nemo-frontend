@@ -28,7 +28,7 @@ export const sidebarOptions = [
     },
     {
         name: "Planos",
-        href: "/dashboard/settings",
+        href: "#",
         icon: BadgePercent
     },
     {
