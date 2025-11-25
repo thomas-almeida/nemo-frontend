@@ -28,6 +28,7 @@ export default function ClientLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="geo.region" content="BR-SP" />
+        <meta name="google-site-verification" content="zgHS_ojEvtjtz-1XuWQ1KYbpGK7bHuziF_7Xl2et_E8" />
 
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
