@@ -12,9 +12,9 @@ function StoreInitializer({ session }: StoreInitializerProps) {
     const setUser = useUserStore((state) => state.setUser);
 
     useEffect(() => {
-        if (session?.user?._id) {
+        if (session?.user?._id || session?.user?.id) {
             setUser({
-                _id: session.user._id,
+                id: session.user._id || session.user.id || '',
                 username: session.user.username || '',
                 email: session.user.email || '',
                 sessionId: session.user.sessionId || '',
