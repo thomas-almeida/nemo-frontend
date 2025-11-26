@@ -94,22 +94,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center text-foreground font-sans selection:bg-primary/20 selection:text-primary overflow-x-hidden relative">
-      {/* Floating WhatsApp Button */}
-      <a 
-        href="https://wa.me/5511949098312" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
-        aria-label="Fale conosco no WhatsApp"
-      >
-        <Image 
-          src="/whatsapp.png" 
-          alt="WhatsApp" 
-          width={32} 
-          height={32} 
-          className="w-9 h-9"
-        />
-      </a>
       <div className="w-[80%] md:w-auto">
         {/* Header */}
         <header className="fixed px-12 inset-x-0 top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
