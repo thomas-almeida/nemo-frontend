@@ -28,6 +28,7 @@ import { AddToListModal } from "./components/AddToListModal"
 import { EditCustomerModal } from "./components/EditCustomerModal"
 import { ImportCustomersSheet } from "./components/ImportCustomersSheet"
 import { SendMessageModal } from "./components/SendMessageModal"
+import MessageModal from "@/app/components/MessageModal"
 
 export default function CustomersPage() {
     const { customers } = useCustomers()
@@ -44,6 +45,7 @@ export default function CustomersPage() {
     const [selectedCustomers, setSelectedCustomers] = useState<Set<string>>(new Set())
     const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false)
     const [isAddToListModalOpen, setIsAddToListModalOpen] = useState(false)
+    const [showModal, setShowModal] = useState(false)
     const [listName, setListName] = useState("")
 
     // Extract all unique labels from customers
@@ -239,8 +241,7 @@ export default function CustomersPage() {
                     <button
                         onClick={(e) => {
                             e.stopPropagation()
-                            setMessagingCustomer(row.original)
-                            setIsMessageModalOpen(true)
+                            setShowModal(true)
                         }}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
                         title="Ligar com script"
@@ -463,6 +464,12 @@ export default function CustomersPage() {
                 customer={messagingCustomer}
                 open={isMessageModalOpen}
                 onOpenChange={setIsMessageModalOpen}
+            />
+            <MessageModal
+                visible={showModal}
+                onClose={() => setShowModal(false)}
+                message="Gere Scripts de Ligação Poderosos!"
+                description="Este é um recurso para assinantes. Para acessar scripts de ligação infalíveis para sua prospecção, considere escolher um dos nossos planos."
             />
         </>
     )
