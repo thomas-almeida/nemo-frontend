@@ -28,6 +28,18 @@ interface Message {
         name: string;
         publicLink: string;
     };
+    video?: {
+        url: string;
+        type: string;
+        name: string;
+        publicLink: string;
+    };
+    document?: {
+        url: string;
+        type: string;
+        name: string;
+        publicLink: string;
+    };
 }
 
 export default function NewCampaign() {
@@ -162,10 +174,21 @@ export default function NewCampaign() {
         }
     }, [customerLists]); // Removemos customers das dependências já que não está sendo usado
 
+    useEffect(() => {
+        console.log("messages: ", messages)
+    }, [messages])
+
     function getCustomersFromId(id: string) {
         setTargetList(id); // Atualiza o estado do select
-        const list = customerLists.find((list: any) => list._id === id);
-        setSelectedCustomers(list?.customers || []);
+
+        if (id === 'all_customers') {
+            // Se for 'Toda minha base', usa todos os clientes do usuário
+            setSelectedCustomers(customers || []);
+        } else {
+            // Senão, usa a lista de clientes selecionada
+            const list = customerLists.find((list: any) => list._id === id);
+            setSelectedCustomers(list?.customers || []);
+        }
     }
 
     async function send() {
@@ -204,10 +227,35 @@ export default function NewCampaign() {
                 const newProgress = Math.round((processedCount / numbers.length) * 100);
                 setProgress(newProgress);
 
-                const newMsgFormatt = msgs.map(msg => ({
-                    message: msg.message,
-                    image: msg.image
-                }));
+                const newMsgFormatt = msgs.map(msg => {
+                    const formattedMsg: any = {
+                        message: msg.message
+                    };
+
+                    // Handle image if present
+                    if (msg.image) {
+                        formattedMsg.image = {
+                            url: msg.image.publicLink
+                        };
+                    }
+                    
+                    // Handle video if present
+                    if (msg.video) {
+                        formattedMsg.video = {
+                            url: msg.video.publicLink
+                        };
+                    }
+                    
+                    // Handle document if present
+                    if (msg.document) {
+                        formattedMsg.document = {
+                            url: msg.document.publicLink,
+                            filename: msg.document.name || 'Documento'
+                        };
+                    }
+
+                    return formattedMsg;
+                });
 
                 try {
 
@@ -312,6 +360,7 @@ export default function NewCampaign() {
                             <Select
                                 options={[
                                     { value: '', label: 'Selecione' },
+                                    { value: 'all_customers', label: 'Toda minha base' },
                                     ...customerListArr
                                 ]}
                                 value={targetList}
@@ -425,7 +474,7 @@ export default function NewCampaign() {
                                                 (
                                                     <div>
                                                         <MessageComponent
-                                                            message={copy || (selectedMedia ? '' : 'Prévia da mensagem aparecerá aqui')}
+                                                            message={copy}
                                                             draggable={false}
                                                         />
                                                     </div>
@@ -444,18 +493,45 @@ export default function NewCampaign() {
                                                 className="w-full cursor-pointer mt-2"
                                                 onClick={() => {
                                                     if (!copy && !selectedMedia) return;
+
+                                                    // Create base message
                                                     const newMessage: Message = {
                                                         id: Date.now(),
                                                         message: copy,
-                                                        ...(selectedMedia && {
-                                                            image: {
-                                                                url: selectedMedia.url,
-                                                                type: selectedMedia.type,
-                                                                name: selectedMedia.name,
-                                                                publicLink: selectedMedia.publicLink
-                                                            }
-                                                        })
                                                     };
+
+                                                    // Add attachment if exists
+                                                    if (selectedMedia) {
+                                                        const { url, type, name, publicLink } = selectedMedia;
+                                                        console.log(selectedMedia)
+
+                                                        if (selectedMedia?.type.includes('video')) {
+                                                            newMessage.video = {
+                                                                url,
+                                                                type,
+                                                                name,
+                                                                publicLink: selectedMedia.publicLink
+                                                            };
+                                                        } else if (selectedMedia?.type.includes('image')) {
+                                                            newMessage.image = {
+                                                                url,
+                                                                type,
+                                                                name,
+                                                                publicLink: selectedMedia.publicLink
+                                                            };
+                                                        } else {
+                                                            // Default to document for other types
+                                                            newMessage.document = {
+                                                                url,
+                                                                type,
+                                                                name,
+                                                                publicLink: selectedMedia.publicLink
+                                                            };
+                                                        }
+                                                    }
+
+                                                    console.log('message with attachment:', newMessage);
+
                                                     setMessages(prev => [...prev, newMessage]);
                                                     setCopy('');
                                                     setSelectedMedia(null);
@@ -478,7 +554,7 @@ export default function NewCampaign() {
                                                     id={message.id}
                                                     index={index}
                                                     message={message.message}
-                                                    image={message.image}
+                                                    attachment={message.image || message.video || message.document}
                                                     moveMessage={moveMessage}
                                                     draggable={true}
                                                     onDelete={handleDeleteMessage}

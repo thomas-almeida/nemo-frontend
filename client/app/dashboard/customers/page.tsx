@@ -8,7 +8,7 @@ import { getAllCustomers } from "@/app/service/customer-service"
 import { createCustomerList } from "@/app/service/customerlist-service"
 import useCustomerStore from "@/app/store/customer-store"
 import DataTable from "@/app/components/DataTable"
-import { Search, X, ListPlus, Plus, FilePlus } from "lucide-react"
+import { Search, X, ListPlus, PhoneCall } from "lucide-react"
 import { ColumnDef, Row } from "@tanstack/react-table"
 import {
     Select,
@@ -210,14 +210,14 @@ export default function CustomersPage() {
             id: "actions",
             header: "Ações",
             cell: ({ row }) => (
-                <div className="flex items-center space-x-1">
+                <div className="grid grid-cols-3 gap-2">
                     <button
                         onClick={(e) => {
                             e.stopPropagation()
                             setEditingCustomer(row.original)
                             setIsEditModalOpen(true)
                         }}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
                         title="Editar cliente"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -231,10 +231,21 @@ export default function CustomersPage() {
                             setMessagingCustomer(row.original)
                             setIsMessageModalOpen(true)
                         }}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
                         title="Enviar mensagem"
                     >
                         <MessageSquare className="h-4 w-4" />
+                    </button>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setMessagingCustomer(row.original)
+                            setIsMessageModalOpen(true)
+                        }}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors cursor-pointer"
+                        title="Ligar com script"
+                    >
+                        <PhoneCall className="h-4 w-4" />
                     </button>
                 </div>
             ),
