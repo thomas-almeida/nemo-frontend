@@ -15,11 +15,12 @@ import { Plus, Send, X } from "lucide-react"
 import Select from "@/app/components/Select"
 import { sendMessage } from "@/app/service/sender-service"
 import { useAuth } from "@/app/hooks/use-auth"
+import { url } from "inspector"
 
 export interface Message {
     id: number | string;
     message: string;
-    image?: {
+    attachment?: {
         url: string;
         type: string;
         name: string;
@@ -102,6 +103,31 @@ export function SendMessageModal({ customer, open, onOpenChange }: SendMessageMo
         }
     }, [selectedProject, allAttachments])
 
+    const checkAttachmentType = (attachment: any) => {
+        if (attachment?.type.startsWith('image')) {
+            return {
+                image: {
+                    url: attachment?.publicLink,
+                    filename: attachment?.name
+                }
+            }
+        } else if (attachment.type.startsWith('video')) {
+            return {
+                video: {
+                    url: attachment?.publicLink,
+                    filename: attachment?.name
+                }
+            }
+        } else {
+            return {
+                document: {
+                    url: attachment?.publicLink,
+                    filename: attachment?.name
+                }
+            }
+        }
+    }
+
     const handleSendMessage = async () => {
         if (!customer?.phone) {
             toast.error('Número de telefone do cliente não encontrado')
@@ -118,8 +144,10 @@ export function SendMessageModal({ customer, open, onOpenChange }: SendMessageMo
             const formattedPhone = formatPhoneNumber(customer.phone)
             const formattedMessages = messages.map(msg => ({
                 message: msg.message,
-                ...(msg.image && { image: msg.image })
+                ...(msg.attachment && checkAttachmentType(msg.attachment))
             }))
+
+            console.log(formattedMessages)
 
             await sendMessage(user.sessionId, formattedPhone, formattedMessages)
             toast.success('Mensagem enviada com sucesso!')
@@ -138,7 +166,6 @@ export function SendMessageModal({ customer, open, onOpenChange }: SendMessageMo
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50 p-4"
-            onClick={() => onOpenChange(false)}
         >
             <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center p-4 border-b">
@@ -223,7 +250,7 @@ export function SendMessageModal({ customer, open, onOpenChange }: SendMessageMo
                                                         id: Date.now(),
                                                         message: copy,
                                                         ...(selectedMedia && {
-                                                            image: {
+                                                            attachment: {
                                                                 url: selectedMedia.url,
                                                                 type: selectedMedia.type,
                                                                 name: selectedMedia.name,
@@ -231,6 +258,7 @@ export function SendMessageModal({ customer, open, onOpenChange }: SendMessageMo
                                                             }
                                                         })
                                                     }
+                                                    console.log(newMessage)
                                                     setMessages(prev => [...prev, newMessage])
                                                     setCopy('')
                                                     setSelectedMedia(null)
@@ -256,7 +284,7 @@ export function SendMessageModal({ customer, open, onOpenChange }: SendMessageMo
                                                 id={message.id}
                                                 index={index}
                                                 message={message.message}
-                                                image={message.image}
+                                                attachment={message.attachment}
                                                 moveMessage={moveMessage}
                                                 draggable={true}
                                                 onDelete={handleDeleteMessage}
