@@ -6,6 +6,12 @@ import "./globals.css";
 import SideBar from "./components/SideBar";
 import { Provider } from "./components/Provider";
 import MessageBanner from "./components/MessageBanner";
+import dynamic from 'next/dynamic';
+
+const WhatsAppButton = dynamic(
+  () => import('../components/WhatsAppButton'),
+  { ssr: false }
+);
 
 export default function ClientLayout({
   children,
@@ -80,7 +86,7 @@ export default function ClientLayout({
           `}
         </Script>
       </head>
-      <body className="antialiased flex justify-start">
+      <body className="min-h-screen bg-white">
         <Provider>
           <SideBar />
           <div className={`${!isRoot ? 'pl-45' : ''} flex flex-col justify-start items-start w-full h-screen`}>
@@ -89,6 +95,7 @@ export default function ClientLayout({
               {children}
             </div>
           </div>
+          <WhatsAppButton />
         </Provider>
       </body>
     </html>
