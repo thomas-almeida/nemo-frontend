@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/hooks/use-auth';
 import { createAttachment } from '@/app/service/attachment-service';
-import { Folder, Plus, Trash2} from "lucide-react";
+import { Folder, Plus, Trash2 } from "lucide-react";
 import FileUpload from "@/app/components/FileUpload";
 import { Input } from "@/components/ui/input";
 import Accordion from "@/app/components/Accordion";
@@ -64,7 +64,7 @@ export default function NewProject() {
     const [newUnit, setNewUnit] = useState({ footage: '', price: '' });
     const [newLocation, setNewLocation] = useState({ name: '', distance: '' });
     const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-    const [attachments, setAttachments] = useState<{type: string; file: File}[]>([]);
+    const [attachments, setAttachments] = useState<{ type: string; file: File }[]>([]);
     const { user } = useAuth();
 
     const {
@@ -106,7 +106,7 @@ export default function NewProject() {
             setAttachments(prev => prev.filter(att => att.type !== type));
             return;
         }
-        
+
         setAttachments(prev => [
             ...prev.filter(att => att.type !== type),
             { type, file }
@@ -121,6 +121,10 @@ export default function NewProject() {
 
         const projectData = {
             ...data,
+            owner: {
+                id: user.id,
+                role: 'ADMIN'
+            },
             type: selectedTypes,
             units: units.map(unit => ({
                 footage: Number(unit.footage),
@@ -134,18 +138,18 @@ export default function NewProject() {
 
         try {
             setIsSubmitting(true);
-            
+
             // 1. Criar o projeto primeiro
             const projectResponse = await createProject(projectData);
             const projectId = projectResponse?.data?._id;
-            
+
             if (!projectId) {
                 throw new Error('Falha ao criar o projeto: ID não retornado');
             }
 
             // 2. Fazer upload dos anexos em paralelo
             if (attachments.length > 0) {
-                const uploadPromises = attachments.map(attachment => 
+                const uploadPromises = attachments.map(attachment =>
                     createAttachment({
                         file: attachment.file,
                         name: `${projectData.info.name} - ${attachment.type}`,
@@ -153,10 +157,10 @@ export default function NewProject() {
                         ownerId: user.id
                     })
                 );
-                
+
                 await Promise.all(uploadPromises);
             }
-            
+
             router.push('/dashboard/projects');
         } catch (error) {
             console.error('Erro ao criar projeto ou enviar anexos:', error);
