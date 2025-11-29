@@ -6,14 +6,35 @@ export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "info.name",
     header: "Nome" as const,
+    size: 150, // Fixed width in pixels
+    maxSize: 150,
+    cell: (info) => (
+      <div className="truncate" style={{ maxWidth: '150px' }} title={info.getValue() as string}>
+        {info.getValue() as string}
+      </div>
+    ),
   },
   {
     accessorKey: "info.address",
     header: "Endereço" as const,
+    size: 200, // Fixed width in pixels
+    maxSize: 200,
+    cell: (info) => (
+      <div className="truncate" style={{ maxWidth: '150px' }} title={info.getValue() as string}>
+        {info.getValue() as string}
+      </div>
+    ),
   },
   {
     accessorKey: "info.developer",
     header: "Incorporadora" as const,
+    size: 150, // Fixed width in pixels
+    maxSize: 150,
+    cell: (info) => (
+      <div className="truncate" style={{ maxWidth: '150px' }} title={info.getValue() as string}>
+        {info.getValue() as string}
+      </div>
+    ),
   },
   {
     accessorKey: "type",
@@ -33,35 +54,6 @@ export const columns: ColumnDef<any>[] = [
     cell: (info) => {
       const units = info.row.original.units || [];
       return <UnitCountBadge units={units} />;
-    },
-  },
-  {
-    id: "averagePrice",
-    header: "Preço Médio",
-    cell: (info) => {
-      const units = info.row.original.units || [];
-      if (units.length === 0) return '-';
-      
-      const total = units.reduce((sum: number, unit: { price: number }) => sum + unit.price, 0);
-      const average = total / units.length;
-      
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(average);
-    },
-  },
-  {
-    accessorKey: "info.releaseDate",
-    header: "Entrega" as const,
-    cell: (info) => {
-      const date = info.getValue() as string;
-      if (!date) return '-'; // Retorna um traço se não houver data
-      return new Date(date).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
     },
   },
 ];
